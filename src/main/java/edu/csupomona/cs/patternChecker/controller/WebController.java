@@ -43,6 +43,9 @@ import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.github.javaparser.ast.expr.ThisExpr;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
@@ -63,6 +66,7 @@ public class WebController
 	private static List<String> methodNames = new ArrayList<String>();
 	private static List<String> classNames = new ArrayList<String>();
 	private static List<String> singletonNames = new ArrayList<String>();
+	private static List<String> prototypeNames = new ArrayList<String>();
 	private static String url="home";
 
 	@RequestMapping(value = "/patternChecker/welcome", method = RequestMethod.GET)
@@ -78,6 +82,7 @@ public class WebController
 	void checkGit(@PathVariable("repoURL") String repoURL) throws ParseException, IOException
 	{
 		singletonNames.clear();
+		prototypeNames.clear();
 		methodNames.clear();
 		classNames.clear();
 		//get a UUID for the name of the directory to place the repository in
@@ -127,6 +132,7 @@ public class WebController
 			// visit and print the methods names for this file
 	        new MethodVisitor().visit(cu, null);
 	        new FindSingleton().visit(cu, null);
+	        new FindPrototype().visit(cu, null);
 		}
 	}
 	
@@ -199,8 +205,11 @@ public class WebController
 						String fieldName = field.getType().toString();
 						if(fieldName.equals(className))
 						{
-							VariableDeclarator n = (VariableDeclarator)field.getChildrenNodes().get(1);
-							instanceVariableName=n.getId().toString();
+							if(field.getChildrenNodes().get(1) instanceof VariableDeclarator)
+							{
+								VariableDeclarator n = (VariableDeclarator)field.getChildrenNodes().get(1);
+								instanceVariableName=n.getId().toString();
+							}
 						}
 					}
 					if(a instanceof ConstructorDeclaration)
@@ -220,6 +229,86 @@ public class WebController
 		}
 	}
 	
+	public static class FindPrototype extends VoidVisitorAdapter<Object>
+	{
+		public void visit(ClassOrInterfaceDeclaration c, Object arg)
+		{
+			//search for a Prototype. Prototype requires: a class
+			//that has a method that returns a new object with "this" passed to the constructor. 
+			String className = c.getName();
+			if(className != null)
+			{
+				Boolean hasRequiredReturnType=false;
+				Boolean constructorIsPrivate=false;
+				List<Node> nodeList= c.getChildrenNodes();
+				for(Node a : nodeList)
+				{
+					if(a instanceof MethodDeclaration)
+					{
+						//see if the method returns a type of this class
+						ReturnStmt returnStmt=(ReturnStmt) FindReturnStatement(a.getChildrenNodes());
+						if(returnStmt!=null)
+						{
+							//make sure the return statement is creating a new object
+							Node b = returnStmt.getChildrenNodes().get(0);
+							if(b !=null && b instanceof ObjectCreationExpr)
+							{
+								//make sure the parameter is 'this'
+								List <Expression> args = ((ObjectCreationExpr) b).getArgs();
+								if(args != null && args.size() == 1 && args.get(0) instanceof ThisExpr)
+								{
+									hasRequiredReturnType=true;
+								}	
+							}
+							
+							//the other option is the user is returning a super.clone()
+							if(returnStmt.toString().contains(".clone()"))
+							{
+								hasRequiredReturnType=true;
+							}
+						}
+					}
+					if(a instanceof ConstructorDeclaration)
+					{
+						if(a.toString().contains("private"))
+						{
+							constructorIsPrivate=true;
+						}
+					}
+				}
+				if(!constructorIsPrivate && hasRequiredReturnType)
+				{
+					prototypeNames.add(className);
+				}
+			}
+		}
+	}
+	
+	private static Node FindReturnStatement(List<Node> myList)
+	{
+		Node returnStmt=null;
+		for(Node b : myList)
+		{
+			if(b.getChildrenNodes() != null)
+			{
+				returnStmt = FindReturnStatement(b.getChildrenNodes());
+				if(returnStmt!=null)
+				{
+					return returnStmt;
+				}
+			}
+			
+			if(b instanceof ReturnStmt)
+			{
+				List<Node> childList = b.getChildrenNodes();
+				if(!childList.isEmpty())
+				{
+					return b;
+				}
+			}
+		}
+		return returnStmt;
+	}
 	private static String FindReturnName(List<Node> myList)
 	{
 		String returnName = "";
@@ -263,6 +352,7 @@ public class WebController
 		modelAndView.addObject("methods", methodNames);
 		modelAndView.addObject("classes", classNames);
 		modelAndView.addObject("singleton", singletonNames);
+		modelAndView.addObject("prototype", prototypeNames);
 		return modelAndView;
 	}
 }

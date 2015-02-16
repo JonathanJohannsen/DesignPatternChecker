@@ -39,6 +39,26 @@
         </ul>
     </div>  
     
+    <!-- Prototype Names -->
+    <hr>
+    <div>
+        <h2>Prototypes:</h2> 
+        <label>The following instances of Prototype were found in the repository</label>   
+        <ul>
+            <#if prototype??>
+            <#list prototype as prototypeName>
+              <li>
+                <div>
+                    <div>
+                        ${prototypeName}
+                    </div>
+                </div>
+              </li>
+            </#list>
+            </#if>
+        </ul>
+    </div>  
+    
     <!-- Class Names -->
     <hr>
     <div>
