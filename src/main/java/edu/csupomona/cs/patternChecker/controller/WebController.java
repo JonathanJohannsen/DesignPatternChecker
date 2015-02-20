@@ -1,14 +1,14 @@
 package edu.csupomona.cs.patternChecker.controller;
 
 import java.io.File;
+
+import edu.csupomona.cs.patternChecker.data.*;
+
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
@@ -16,13 +16,6 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -41,6 +34,7 @@ import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.MultiTypeParameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.Expression;
@@ -67,6 +61,7 @@ public class WebController
 	private static List<String> classNames = new ArrayList<String>();
 	private static List<String> singletonNames = new ArrayList<String>();
 	private static List<String> prototypeNames = new ArrayList<String>();
+	private static List<String> observerNames = new ArrayList<String>();
 	private static String url="home";
 
 	@RequestMapping(value = "/patternChecker/welcome", method = RequestMethod.GET)
@@ -83,6 +78,7 @@ public class WebController
 	{
 		singletonNames.clear();
 		prototypeNames.clear();
+		observerNames.clear();
 		methodNames.clear();
 		classNames.clear();
 		//get a UUID for the name of the directory to place the repository in
@@ -133,6 +129,7 @@ public class WebController
 	        new MethodVisitor().visit(cu, null);
 	        new FindSingleton().visit(cu, null);
 	        new FindPrototype().visit(cu, null);
+	        new FindObserver().visit(cu,  null);
 		}
 	}
 	
@@ -272,6 +269,7 @@ public class WebController
 					{
 						if(a.toString().contains("private"))
 						{
+							//if there is a constructor, it must be public
 							constructorIsPrivate=true;
 						}
 					}
@@ -281,6 +279,64 @@ public class WebController
 					prototypeNames.add(className);
 				}
 			}
+		}
+	}
+	
+	private static class FindObserver extends VoidVisitorAdapter<Object>
+	{
+		//find an implementation of the Observer pattern. Observer requires:
+		//A collection of a specific type
+		//A routine to add an element to that collection and one to remove from it
+		//method to loop through the collection. In that loop, call a function
+		//that passes self or one (or more) of your private variables
+		public void visit(ClassOrInterfaceDeclaration c, Object arg)
+		{
+			String className = c.getName();
+			List<CollectionInfo> listOfCollections = new ArrayList<CollectionInfo>();
+			if(className != null)
+			{
+				//a list to contain all the 
+				listOfCollections.clear();
+				CollectionInfo ci;
+				List<Node> nodeList= c.getChildrenNodes();
+				for(Node a : nodeList)
+				{
+					if(a instanceof FieldDeclaration && a.toString().contains("<")
+							 && a.getChildrenNodes() != null)
+					{
+						//grab the 'type' of this list as well as the 'name'
+						List<Node> theNodes = a.getChildrenNodes();
+						if(theNodes.size() < 2)
+						{
+							continue;
+						}
+						String myString = theNodes.get(0).toString();
+						if(myString.contains("<"))
+						{
+							//need a regular expression to grab the info in between the brackets
+							myString=myString.substring(myString.indexOf("<")+1, myString.indexOf(">"));
+							ci = new CollectionInfo();
+							ci.setType(myString);
+							myString=theNodes.get(1).toString();
+							//remove spaces in the case that the declaration has listName = new ArrayList, 
+							//we only want 'listName'
+							if(myString.contains(" "))
+							{
+								myString=myString.substring(0, myString.indexOf(" "));
+							}
+							
+							else if(myString.contains("="))
+							{
+								myString=myString.substring(0, myString.indexOf("="));	
+							}
+							ci.setName(myString);
+							listOfCollections.add(ci);
+							observerNames.add("Variable Type:" + ci.getType());
+							observerNames.add("List Name:" + ci.getName());
+						}
+					}
+				}
+			}	
 		}
 	}
 	
@@ -309,6 +365,7 @@ public class WebController
 		}
 		return returnStmt;
 	}
+	
 	private static String FindReturnName(List<Node> myList)
 	{
 		String returnName = "";
@@ -353,6 +410,7 @@ public class WebController
 		modelAndView.addObject("classes", classNames);
 		modelAndView.addObject("singleton", singletonNames);
 		modelAndView.addObject("prototype", prototypeNames);
+		modelAndView.addObject("observer", observerNames);
 		return modelAndView;
 	}
 }

@@ -59,6 +59,26 @@
         </ul>
     </div>  
     
+        <!-- Observer Names -->
+    <hr>
+    <div>
+        <h2>Observers:</h2> 
+        <label>The following instances of Observer were found in the repository</label>   
+        <ul>
+            <#if observer??>
+            <#list observer as observerName>
+              <li>
+                <div>
+                    <div>
+                        ${observerName}
+                    </div>
+                </div>
+              </li>
+            </#list>
+            </#if>
+        </ul>
+    </div>  
+    
     <!-- Class Names -->
     <hr>
     <div>
