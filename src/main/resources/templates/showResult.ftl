@@ -37,7 +37,28 @@
             </#list>
             </#if>
         </ul>
-    </div>  
+    </div> 
+    
+    <!-- Singleton Errors -->
+    <#if singletonErrors?? && singletonErrors?has_content>
+    <hr>
+    <div>
+        <h2>Possible Singleton Errors:</h2> 
+        <label>The following classes might be using Singleton, but are in error</label>   
+        <ul>
+            <#list singletonErrors as singletonError>
+              <li>
+                <div>
+                    <div>
+                        ${singletonError.getClassName()} : <i>
+                        ${singletonError.getErrorReason()} </i>
+                    </div>
+                </div>
+              </li>
+            </#list>
+            </#if>
+        </ul>
+    </div>   
     
     <!-- Prototype Names -->
     <hr>
@@ -59,18 +80,30 @@
         </ul>
     </div>  
     
-        <!-- Observer Names -->
+        <!-- Subject Names -->
     <hr>
     <div>
-        <h2>Observers:</h2> 
-        <label>The following instances of Observer were found in the repository</label>   
+        <h2>Subjects:</h2> 
+        <label>The following instances of Subject were found in the repository</label>   
         <ul>
-            <#if observer??>
-            <#list observer as observerName>
+            <#if subject??>
+            <#list subject as subjectInfo>
               <li>
                 <div>
                     <div>
-                        ${observerName}
+                      ${subjectInfo.getSubjectName()}
+                      <#if subjectInfo.getObservers()?has_content>
+                         <ul>
+                         <lh>Observers:</lh>
+                         <#list subjectInfo.getObservers() as observerName>
+                           <div>
+                             <li>
+                               ${observerName}
+                             </li>
+                           </div>
+                         </#list>
+                        </ul>
+                       </#if>
                     </div>
                 </div>
               </li>
@@ -79,45 +112,26 @@
         </ul>
     </div>  
     
-    <!-- Class Names -->
+    <!-- Subject Errors -->
+    <#if subjectErrors?? && subjectErrors?has_content>
     <hr>
     <div>
-        <h2>Classes:</h2> 
-        <label>The following classes were found in the repository</label>   
+        <h2>Possible Subject Errors:</h2> 
+        <label>The following classes might be using Subject, but are in error</label>   
         <ul>
-            <#if classes??>
-            <#list classes as className>
+            <#list subjectErrors as subjectError>
               <li>
                 <div>
                     <div>
-                        ${className}
+                        ${subjectError.getClassName()} : <i>
+                        ${subjectError.getErrorReason()} </i>
                     </div>
                 </div>
               </li>
             </#list>
             </#if>
         </ul>
-    </div>  
-    
-    <!-- Method Names -->
-    <hr>
-    <div>
-        <h2>Methods:</h2> 
-        <label>The following methods were found in the repository</label>   
-        <ul>
-            <#if methods??>
-            <#list methods as methodName>
-              <li>
-                <div>
-                    <div>
-                        ${methodName}
-                    </div>
-                </div>
-              </li>
-            </#list>
-            </#if>
-        </ul>
-    </div>        
+    </div>   
 
 </body>
 

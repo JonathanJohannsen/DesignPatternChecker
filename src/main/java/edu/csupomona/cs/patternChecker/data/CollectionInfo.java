@@ -2,11 +2,22 @@ package edu.csupomona.cs.patternChecker.data;
 
 public class CollectionInfo 
 {
+	String classCollectionIsIn = null;
 	String collectionName = null;
 	String typeName = null;
 	Boolean hasAddMethod = false;
 	Boolean hasRemoveMethod = false;
 	Boolean hasNotifyLoop=false;
+	
+	public void setClassCollectionIsIn(String name)
+	{
+		classCollectionIsIn = name;
+	}
+	
+	public String getClassCollectionIsIn()
+	{
+		return classCollectionIsIn;
+	}
 	
 	public void setName(String cn)
 	{
