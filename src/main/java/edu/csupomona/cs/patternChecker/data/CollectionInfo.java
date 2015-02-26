@@ -9,6 +9,9 @@ public class CollectionInfo
 	Boolean hasRemoveMethod = false;
 	Boolean hasNotifyLoop=false;
 	
+	// the notify method having an if statement implies this is mediator
+	Boolean notifyHasIfStatement=false;
+	
 	public void setClassCollectionIsIn(String name)
 	{
 		classCollectionIsIn = name;
@@ -54,6 +57,11 @@ public class CollectionInfo
 		hasNotifyLoop=hasNotify;
 	}
 	
+	public void setNotifyHasIfStatement(Boolean hasIfStmt)
+	{
+		notifyHasIfStatement=hasIfStmt;
+	}
+	
 	public Boolean HasAddMethod()
 	{
 		return hasAddMethod;
@@ -67,5 +75,20 @@ public class CollectionInfo
 	public Boolean HasNotifyLoop()
 	{
 		return hasNotifyLoop;
+	}
+	
+	public Boolean NotifyHasIfStatement()
+	{
+		return notifyHasIfStatement;
+	}
+	
+	public Boolean IsSubjectPattern()
+	{
+		return(hasRemoveMethod && hasAddMethod && hasNotifyLoop && !notifyHasIfStatement);
+	}
+	
+	public Boolean IsMediatorPattern()
+	{
+		return(hasAddMethod && hasNotifyLoop && notifyHasIfStatement);
 	}
 }

@@ -80,7 +80,7 @@
         </ul>
     </div>  
     
-        <!-- Subject Names -->
+    <!-- Subject Names -->
     <hr>
     <div>
         <h2>Subjects:</h2> 
@@ -131,7 +131,39 @@
             </#list>
             </#if>
         </ul>
-    </div>   
+    </div> 
+    
+     <!-- Mediators Names -->
+    <hr>
+    <div>
+        <h2>Mediators:</h2> 
+        <label>The following instances of Mediator were found in the repository</label>   
+        <ul>
+            <#if mediator??>
+            <#list mediator as mediatorInfo>
+              <li>
+                <div>
+                    <div>
+                      ${mediatorInfo.getMediatorName()}
+                      <#if mediatorInfo.getColleagues()?has_content>
+                         <ul>
+                         <lh>Colleagues:</lh>
+                         <#list mediatorInfo.getColleagues() as colleagueName>
+                           <div>
+                             <li>
+                               ${colleague}
+                             </li>
+                           </div>
+                         </#list>
+                        </ul>
+                       </#if>
+                    </div>
+                </div>
+              </li>
+            </#list>
+            </#if>
+        </ul>
+    </div>  
 
 </body>
 

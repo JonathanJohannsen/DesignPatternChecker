@@ -45,10 +45,9 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 @RestController
 public class WebController 
 {	
-	private static List<String> classNames = new ArrayList<String>();
 	private static SingletonChecker singletonChecker = new SingletonChecker();
 	private static PrototypeChecker prototypeChecker = new PrototypeChecker();
-	private static SubjectChecker subjectChecker = new SubjectChecker();
+	private static SubjectMediatorChecker subjectMediatorChecker = new SubjectMediatorChecker();
 	private static ObserverChecker observerChecker;
 	private static String url="home";
 
@@ -111,10 +110,10 @@ public class WebController
 
 	        singletonChecker.visit(cu, null);
 	        prototypeChecker.visit(cu, null);
-	        subjectChecker.visit(cu,  null);
+	        subjectMediatorChecker.visit(cu,  null);
 		}
 		
-		if(!subjectChecker.getSubjects(false).isEmpty())
+		if(!subjectMediatorChecker.getSubjects(false).isEmpty())
 		{
 			for(File iterator : javaFiles)
 			{
@@ -129,8 +128,8 @@ public class WebController
 				{
 					in.close();
 				}
-				observerChecker = new ObserverChecker(subjectChecker.getSubjects(false));
-		        observerChecker.visit(cu, null);
+				observerChecker = new ObserverChecker(subjectMediatorChecker.getSubjects(false));
+				observerChecker.visit(cu, null);
 			}
 		}
 	}
@@ -166,8 +165,9 @@ public class WebController
 		modelAndView.addObject("singleton", singletonChecker.getSingletonNames());
 		modelAndView.addObject("singletonErrors", singletonChecker.getSingletonErrors());
 		modelAndView.addObject("prototype", prototypeChecker.getPrototypeNames());
-		modelAndView.addObject("subject", subjectChecker.getSubjects(true));
-		modelAndView.addObject("subjectErrors", subjectChecker.getSubjectErrors());
+		modelAndView.addObject("subject", subjectMediatorChecker.getSubjects(true));
+		modelAndView.addObject("subjectErrors", subjectMediatorChecker.getSubjectErrors());
+		modelAndView.addObject("mediator", subjectMediatorChecker.getMediators(true));
 		return modelAndView;
 	}
 }
