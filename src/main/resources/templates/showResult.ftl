@@ -20,12 +20,12 @@
     </div>
     
     <!-- Singleton Names -->
+    <#if singleton?? && singleton?has_content>
     <hr>
     <div>
-        <h2>Singletons:</h2> 
+        <h2>Singleton:</h2> 
         <label>The following instances of Singleton were found in the repository</label>   
         <ul>
-            <#if singleton??>
             <#list singleton as singletonName>
               <li>
                 <div>
@@ -35,9 +35,9 @@
                 </div>
               </li>
             </#list>
-            </#if>
         </ul>
     </div> 
+    </#if>
     
     <!-- Singleton Errors -->
     <#if singletonErrors?? && singletonErrors?has_content>
@@ -61,12 +61,12 @@
     </div>   
     
     <!-- Prototype Names -->
+    <#if prototype?? && prototype?has_content>
     <hr>
     <div>
-        <h2>Prototypes:</h2> 
+        <h2>Prototype:</h2> 
         <label>The following instances of Prototype were found in the repository</label>   
         <ul>
-            <#if prototype??>
             <#list prototype as prototypeName>
               <li>
                 <div>
@@ -76,17 +76,17 @@
                 </div>
               </li>
             </#list>
-            </#if>
         </ul>
     </div>  
+    </#if>
     
     <!-- Subject Names -->
+    <#if subject?? && subject?has_content>
     <hr>
     <div>
-        <h2>Subjects:</h2> 
+        <h2>Subject:</h2> 
         <label>The following instances of Subject were found in the repository</label>   
         <ul>
-            <#if subject??>
             <#list subject as subjectInfo>
               <li>
                 <div>
@@ -108,9 +108,9 @@
                 </div>
               </li>
             </#list>
-            </#if>
         </ul>
-    </div>  
+    </div> 
+    </#if> 
     
     <!-- Subject Errors -->
     <#if subjectErrors?? && subjectErrors?has_content>
@@ -129,17 +129,17 @@
                 </div>
               </li>
             </#list>
-            </#if>
         </ul>
-    </div> 
+    </div>
+    </#if> 
     
      <!-- Mediators Names -->
+    <#if mediator?? && mediator?has_content>
     <hr>
     <div>
-        <h2>Mediators:</h2> 
+        <h2>Mediator:</h2> 
         <label>The following instances of Mediator were found in the repository</label>   
         <ul>
-            <#if mediator??>
             <#list mediator as mediatorInfo>
               <li>
                 <div>
@@ -151,7 +151,7 @@
                          <#list mediatorInfo.getColleagues() as colleagueName>
                            <div>
                              <li>
-                               ${colleague}
+                               ${colleagueName}
                              </li>
                            </div>
                          </#list>
@@ -161,9 +161,9 @@
                 </div>
               </li>
             </#list>
-            </#if>
         </ul>
     </div>  
+   </#if>
 
 </body>
 

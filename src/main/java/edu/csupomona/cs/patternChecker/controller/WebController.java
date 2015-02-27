@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
@@ -73,7 +74,7 @@ public class WebController
 		try 
 		{
 			//clone the repo from GitHub
-			Git.cloneRepository().setURI(repoURLFinal).setDirectory(file).call();
+			Git.cloneRepository().setURI(repoURLFinal).setDirectory(file).call().close();
         } 
 
 		catch (InvalidRemoteException e) 
@@ -128,10 +129,12 @@ public class WebController
 				{
 					in.close();
 				}
-				observerChecker = new ObserverChecker(subjectMediatorChecker.getSubjects(false));
+				observerChecker = new ObserverChecker(subjectMediatorChecker.getSubjects(false),
+						subjectMediatorChecker.getMediators(false));
 				observerChecker.visit(cu, null);
 			}
 		}
+		FileUtils.deleteDirectory(file);
 	}
 	
 	public static void findJavaFiles(File root, List<File> javaFiles)
