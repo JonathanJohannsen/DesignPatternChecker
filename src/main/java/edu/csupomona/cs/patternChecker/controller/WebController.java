@@ -25,15 +25,6 @@ import org.springframework.web.servlet.ModelAndView;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseException;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.ConstructorDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.ObjectCreationExpr;
-import com.github.javaparser.ast.expr.ThisExpr;
-import com.github.javaparser.ast.stmt.ReturnStmt;
-import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 /**
  * This is the controller used by Spring framework.
@@ -50,17 +41,11 @@ public class WebController
 	private static PrototypeChecker prototypeChecker = new PrototypeChecker();
 	private static SubjectMediatorChecker subjectMediatorChecker = new SubjectMediatorChecker();
 	private static ObserverChecker observerChecker;
-	private static String url="home";
+	private static String gitURL;
 
-	@RequestMapping(value = "/patternChecker/welcome", method = RequestMethod.GET)
-	String welcomePage() 
-	{
-		//main page of Pattern Checker
-		//http://localhost:8080/patternChecker/welcome
-		return "Welcome to Online Pattern Checker! Enter a git repository URL to check for Design Patterns";
-	}
-
-	//https://github.com/JonathanJohannsen/ibox
+	//http://localhost:8080/patternChecker/Home
+	//https://github.com/JonathanJohannsen/ObserverTest
+	//https://github.com/JonathanJohannsen/java-design-patterns
 	@RequestMapping(value = "/patternChecker/{repoURL}/checkGit", method = RequestMethod.POST)
 	void checkGit(@PathVariable("repoURL") String repoURL) throws ParseException, IOException
 	{
@@ -71,6 +56,7 @@ public class WebController
 		File file = new File(directory);
 		byte[] decoded = Base64.decodeBase64(repoURL);
 		String repoURLFinal=new String(decoded, "UTF-8");
+		gitURL = repoURLFinal;
 		try 
 		{
 			//clone the repo from GitHub
@@ -134,6 +120,7 @@ public class WebController
 				observerChecker.visit(cu, null);
 			}
 		}
+		//once the parsing is done, delete the cloned directory
 		FileUtils.deleteDirectory(file);
 	}
 	
@@ -154,23 +141,18 @@ public class WebController
 	}
 	
 	@RequestMapping(value = "/patternChecker/Home", method = RequestMethod.GET)
-	ModelAndView patternCheckerHome() 
-	{
-		ModelAndView modelAndView = new ModelAndView(url);
-		return modelAndView;
-	}
-	
-	@RequestMapping(value = "/patternChecker/Results", method = RequestMethod.GET)
 	ModelAndView showResults()
 	{
 		//prints out the methods that were found. Redirected here from checkGit()
-		ModelAndView modelAndView = new ModelAndView("showResult");
+		ModelAndView modelAndView = new ModelAndView("home");
 		modelAndView.addObject("singleton", singletonChecker.getSingletonNames());
 		modelAndView.addObject("singletonErrors", singletonChecker.getSingletonErrors());
 		modelAndView.addObject("prototype", prototypeChecker.getPrototypeNames());
+		modelAndView.addObject("prototypeErrors", prototypeChecker.getPrototypeErrors());
 		modelAndView.addObject("subject", subjectMediatorChecker.getSubjects(true));
 		modelAndView.addObject("subjectErrors", subjectMediatorChecker.getSubjectErrors());
 		modelAndView.addObject("mediator", subjectMediatorChecker.getMediators(true));
+		modelAndView.addObject("gitURL", gitURL);
 		return modelAndView;
 	}
 }

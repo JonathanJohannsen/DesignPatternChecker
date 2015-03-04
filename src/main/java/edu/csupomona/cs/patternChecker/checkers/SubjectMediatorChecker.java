@@ -39,7 +39,7 @@ public class SubjectMediatorChecker extends VoidVisitorAdapter<Object>
 	// 1. A collection that holds a specific type of object
 	// 2. A routine to add an element to that collection and one to remove from it
 	// 3. method to loop through the collection. In that loop, call a function
-	//    that passes self or one (or more) of your private variables
+	//    that passes self or one (or more) of your private variables, or an incoming variable
 	
 	// Mediator is the same (for the most part) but has an if statement in the notify method
 	public void visit(ClassOrInterfaceDeclaration c, Object arg)

@@ -8,15 +8,16 @@
 
 <body>
 
-    <h2>Results</h2>
+    <h2 class="mainTitle">Results</h2>
     
     <!-- Submission box for a git url -->
     <hr>
     <div>
         <div>
-            <label>Enter a another url of a public github repository:</label>
+            <label>Enter another url of a public github repository:</label>
             <input id="gitURL" type="text" size="35"></input><button onclick="checkGit()">Submit</button>
         </div>
+         <div id="loading"></div>
     </div>
     
     <!-- Singleton Names -->
@@ -79,6 +80,27 @@
         </ul>
     </div>  
     </#if>
+    
+    <!-- Prototype Errors -->
+    <#if prototypeErrors?? && prototypeErrors?has_content>
+    <hr>
+    <div>
+        <h2>Possible Prototype Errors:</h2> 
+        <label>The following classes might be using Prototype, but are in error</label>   
+        <ul>
+            <#list prototypeErrors as prototypeError>
+              <li>
+                <div>
+                    <div>
+                        ${prototypeError.getClassName()} : <i>
+                        ${prototypeError.getErrorReason()} </i>
+                    </div>
+                </div>
+              </li>
+            </#list>
+            </#if>
+        </ul>
+    </div> 
     
     <!-- Subject Names -->
     <#if subject?? && subject?has_content>

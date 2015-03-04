@@ -11,10 +11,10 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.ThisExpr;
 import com.github.javaparser.ast.stmt.ReturnStmt;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import edu.csupomona.cs.patternChecker.data.PatternError;
-import edu.csupomona.cs.patternChecker.data.SubjectInfo;
 
 public class PrototypeChecker extends VoidVisitorAdapter<Object>
 {
@@ -35,6 +35,15 @@ public class PrototypeChecker extends VoidVisitorAdapter<Object>
 		return returnList;
 	}
 	
+	public List<PatternError> getPrototypeErrors()
+	{
+		List<PatternError> returnList=new ArrayList<PatternError>();
+		returnList.addAll(prototypeErrors);
+		prototypeErrors.clear();
+		return returnList;
+	}
+	
+	
 	public void visit(ClassOrInterfaceDeclaration c, Object arg)
 	{
 		if(c.getName() == null)
@@ -43,14 +52,41 @@ public class PrototypeChecker extends VoidVisitorAdapter<Object>
 		}
 		
 		String className = c.getName();
+		List<ClassOrInterfaceType> extendsNames = new ArrayList<ClassOrInterfaceType>();
+		if(c.getExtends() != null)
+		{
+			extendsNames.addAll(c.getExtends());
+		}
 		Boolean hasRequiredReturnType=false;
-		Boolean constructorIsPrivate=false;
+		Boolean possibleErrorReturnType=false;
+		Boolean hasPublicConstructor=false;
 		List<Node> nodeList= c.getChildrenNodes();
 		for(Node a : nodeList)
 		{
 			if(a instanceof MethodDeclaration)
 			{
-				//see if the method returns a type of this class
+				MethodDeclaration methodDeclaration=(MethodDeclaration) a;
+				String md = methodDeclaration.getType().toString();
+				if(!md.equals(className))
+				{
+					//method does not return a type of this class; make sure it's not in the extends list
+					Boolean found=false;
+					if(extendsNames.isEmpty())
+					{
+						continue;
+					}
+					for(ClassOrInterfaceType ex : extendsNames)
+					{
+						if(md.equals(ex.toString()))
+						{
+							found=true;
+						}
+					}
+					if(!found)
+					{
+						continue;
+					}
+				}
 				ReturnStmt returnStmt=(ReturnStmt) FindReturnStatement(a.getChildrenNodes());
 				if(returnStmt!=null)
 				{
@@ -63,7 +99,15 @@ public class PrototypeChecker extends VoidVisitorAdapter<Object>
 						if(args != null && args.size() == 1 && args.get(0) instanceof ThisExpr)
 						{
 							hasRequiredReturnType=true;
-						}	
+						}
+						
+						else
+						{
+							//if we get this far, it's possible this is a prototype error since the 
+							//method is returning an instance of this type of class but it's not
+							//using 'this'
+							possibleErrorReturnType=true;
+						}
 					}
 					
 					//the other option is the user is returning a super.clone()
@@ -75,16 +119,28 @@ public class PrototypeChecker extends VoidVisitorAdapter<Object>
 			}
 			if(a instanceof ConstructorDeclaration)
 			{
-				if(a.toString().contains("private"))
+				if(!a.toString().contains("private"))
 				{
 					//if there is a constructor, it must be public
-					constructorIsPrivate=true;
+					hasPublicConstructor=true;
 				}
 			}
 		}
-		if(!constructorIsPrivate && hasRequiredReturnType)
+		
+		if(c.toString().contains("implements Cloneable"))
 		{
 			prototypeNames.add(className);
+		}
+		
+		else if(hasPublicConstructor && hasRequiredReturnType)
+		{
+			prototypeNames.add(className);
+		}
+		
+		else if(hasPublicConstructor && possibleErrorReturnType)
+		{
+			prototypeErrors.add(new PatternError(className, "Prototype clone should return an "
+					+ "instance of 'this'"));
 		}
 	}
 	

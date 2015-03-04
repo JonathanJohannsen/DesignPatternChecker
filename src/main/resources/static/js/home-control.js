@@ -4,6 +4,7 @@ function checkGit()
     var repoUrl = btoa($('#gitURL').val());
     if(repoUrl)
     {
+        $('#loading').html('<img src="http://preloaders.net/preloaders/287/Filling%20broken%20ring.gif"> loading...this may take a few moments');
         $.ajax(
             {
                 type : "POST",
@@ -13,7 +14,8 @@ function checkGit()
                 },
                 success : function(result) 
                 {
-                    window.location.href = "/patternChecker/Results";
+                    $('#loaderImage').hide();
+                    window.location.href = "/patternChecker/Home";
                 },
                 error: function (jqXHR, exception) 
                 {

@@ -12,6 +12,7 @@ public class MediatorInfo
 	public MediatorInfo(String sn, String ct)
 	{
 		mediatorName = sn;
+		//what class type the colleagues of this mediator should be/implement
 		colleagueType = ct;
 		colleagueNames = new ArrayList<String>();
 	}

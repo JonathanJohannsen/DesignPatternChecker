@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import edu.csupomona.cs.patternChecker.data.MediatorInfo;
@@ -37,14 +36,16 @@ public class ObserverChecker extends VoidVisitorAdapter<Object>
 		String className = c.getName();
 		for(SubjectInfo si : subjects)
 		{
-			String testString = "implements " + si.getObserverType();
+			String impString = "implements " + si.getObserverType();
+			String extString = "extends " + si.getObserverType();
 			String wholeThing = c.toString();
 			if(className.equals(si.getObserverType()))
 			{
 				si.addObserver(className);
 			}
 
-			else if(wholeThing.contains(testString))
+			else if(wholeThing.contains(impString) || wholeThing.contains(extString) &&
+					!className.equals(si.getSubjectName()))
 			{
 				si.addObserver(className);
 			}
@@ -52,18 +53,18 @@ public class ObserverChecker extends VoidVisitorAdapter<Object>
 		for(MediatorInfo mi : mediators)
 		{
 		
-			String testString = "implements " + mi.getColleagueType();
+			String impString = "implements " + mi.getColleagueType();
+			String extString = "extends " + mi.getColleagueType();
 			String wholeThing = c.toString();
 			if(className.equals(mi.getColleagueType()))
 			{
 				mi.addColleague(className);
 			}
 
-			else if(wholeThing.contains(testString))
+			else if(wholeThing.contains(impString) || wholeThing.contains(extString))
 			{
 				mi.addColleague(className);
 			}
 		}
 	}
-	
 }
