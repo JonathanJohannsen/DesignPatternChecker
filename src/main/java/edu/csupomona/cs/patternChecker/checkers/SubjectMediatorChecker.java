@@ -10,6 +10,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.stmt.ForeachStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import edu.csupomona.cs.patternChecker.data.CollectionInfo;
@@ -50,6 +51,11 @@ public class SubjectMediatorChecker extends VoidVisitorAdapter<Object>
 		}
 		
 		String className = c.getName();
+		if(implementsOrExtendsObservable(c.getImplements(), c.getExtends()))
+		{
+			//the easy case: the class simply implements or extends observable, so we can immediately add it
+			subjectNames.add(new SubjectInfo(className, "anyThatImplement"));
+		}
 		
 		//a list to contain collectionInfo objects.
 		List<Node> nodeList= c.getChildrenNodes();
@@ -123,7 +129,7 @@ public class SubjectMediatorChecker extends VoidVisitorAdapter<Object>
 	
 	private void getCollectionName(CollectionInfo ci, Node node)
 	{
-		//based on an incoming string, find the name of the collection of observers
+		//based on an incoming string, find the name of the collection of observers or colleagues
 		
 		//remove spaces in the case that the declaration has collectionName = new ArrayList, 
 		//we only want 'collectionName'
@@ -267,5 +273,32 @@ public class SubjectMediatorChecker extends VoidVisitorAdapter<Object>
 			mediatorNames.clear();
 		}
 		return returnList;
+	}
+	
+	public Boolean implementsOrExtendsObservable(List<ClassOrInterfaceType> classesBeingImplemented,
+			List<ClassOrInterfaceType> classesBeingExtended)
+	{
+		if(classesBeingImplemented != null)
+		{
+			for(ClassOrInterfaceType ci : classesBeingImplemented)
+			{
+				if(ci.toString().equals("Observable"))
+				{
+					return true;
+				}
+			}
+		}
+		
+		if(classesBeingExtended != null)
+		{
+			for(ClassOrInterfaceType ci : classesBeingExtended)
+			{
+				if(ci.toString().equals("Observable"))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }

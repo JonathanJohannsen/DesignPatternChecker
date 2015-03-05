@@ -2,8 +2,12 @@ package edu.csupomona.cs.patternChecker.data;
 
 public class CollectionInfo 
 {
+	//collection info holds all relevant info about a collection contained in a class. 
+	//to be used for both the subject and mediator pattern checkers. Could be updated later
+	//on to be used by future pattern checkers. 
 	String classCollectionIsIn = null;
 	String collectionName = null;
+	//type name is what type of object this collection holds
 	String typeName = null;
 	Boolean hasAddMethod = false;
 	Boolean hasRemoveMethod = false;

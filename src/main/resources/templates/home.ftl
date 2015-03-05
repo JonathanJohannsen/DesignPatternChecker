@@ -185,7 +185,7 @@
                 <td style='padding-left: 50px;' valign="top">
         </#if>
             <h2>Possible Subject Errors:</h2> 
-            <label>The following classes might be using Subject, but are in error</label>   
+            <label>The following classes might be using Subject, but contain errors</label>   
             <ul>
                 <#list subjectErrors as subjectError>
                   <li>

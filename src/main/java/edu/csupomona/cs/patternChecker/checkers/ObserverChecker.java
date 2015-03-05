@@ -25,7 +25,7 @@ public class ObserverChecker extends VoidVisitorAdapter<Object>
 		mediators.addAll(mi);
 	}
 	
-	// finds any class that is built to observer any of the subjects in the system
+	// finds any class that is built to observe any of the subjects in the system
 	public void visit(ClassOrInterfaceDeclaration c, Object arg)
 	{
 		if(c.getName() == null)
@@ -36,8 +36,21 @@ public class ObserverChecker extends VoidVisitorAdapter<Object>
 		String className = c.getName();
 		for(SubjectInfo si : subjects)
 		{
-			String impString = "implements " + si.getObserverType();
-			String extString = "extends " + si.getObserverType();
+			String observerType;
+			if(si.getObserverType().equals("anyThatImplement"))
+			{
+				//if the observer is the kind that simply implements Observer (rather than constructing from scratch)
+				//then any class that implements or extends "Observer" is a potential Observer of this subject
+				observerType = "Observer";
+			}
+			else
+			{
+				//otherwise, the class would need to implement or extend the class type that the collection in the subject holds
+				observerType = si.getObserverType();
+			}
+
+			String impString = "implements " + observerType;
+			String extString = "extends " + observerType;
 			String wholeThing = c.toString();
 			if(className.equals(si.getObserverType()))
 			{
