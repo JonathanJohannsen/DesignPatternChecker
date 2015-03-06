@@ -23,6 +23,7 @@ public class SubjectMediatorChecker extends VoidVisitorAdapter<Object>
 	//all collections in the incoming class will have their information stored in the following collection
 	private static List<CollectionInfo> listOfCollections;
 	private static List<SubjectInfo> subjectNames;
+	private static List<String> implementsOrExtends;
 	
 	//collection to hold name of any classes that appear to implement subject, but are in error.
 	private static List<PatternError> subjectErrors;
@@ -34,6 +35,7 @@ public class SubjectMediatorChecker extends VoidVisitorAdapter<Object>
 		mediatorNames = new ArrayList<MediatorInfo>();
 		listOfCollections = new ArrayList<CollectionInfo>();
 		subjectErrors = new ArrayList<PatternError>();
+		implementsOrExtends = new ArrayList<String>();
 	}
 	
 	//find an implementation of the Observer or Mediator pattern. Observer requires:
@@ -56,6 +58,9 @@ public class SubjectMediatorChecker extends VoidVisitorAdapter<Object>
 			//the easy case: the class simply implements or extends observable, so we can immediately add it
 			subjectNames.add(new SubjectInfo(className, "anyThatImplement"));
 		}
+		
+		//make a list of every other class that is extended or implemented by this class
+		implementsOrExtends(c.getImplements(), c.getExtends());
 		
 		//a list to contain collectionInfo objects.
 		List<Node> nodeList= c.getChildrenNodes();
@@ -83,6 +88,13 @@ public class SubjectMediatorChecker extends VoidVisitorAdapter<Object>
 		//if we find a CollectionInfo in our list that has all the required attributes, add it 
 		for(CollectionInfo ci : listOfCollections)
 		{
+			if(implementsOrExtends.contains(ci.getType()))
+			{
+				//could be a composite false positive: composite pattern extends or implements
+				//the same type of class that its collection contains. Subject does not 
+				continue;
+			}
+			
 			if(ci.IsSubjectPattern())
 			{
 				subjectNames.add(new SubjectInfo(ci.getClassCollectionIsIn(), ci.getType()));
@@ -103,6 +115,7 @@ public class SubjectMediatorChecker extends VoidVisitorAdapter<Object>
 				subjectErrors.add(new PatternError(ci.getClassCollectionIsIn(), "Subject has no add method"));
 			}
 		}
+		implementsOrExtends.clear();
 		listOfCollections.clear();
 	}
 	
@@ -275,6 +288,29 @@ public class SubjectMediatorChecker extends VoidVisitorAdapter<Object>
 		return returnList;
 	}
 	
+	public void implementsOrExtends(List<ClassOrInterfaceType> classesBeingImplemented,
+			List<ClassOrInterfaceType> classesBeingExtended)
+	{
+		//finds out what the class is extending or implementing. We need to know this to
+		//cut down on finding composite as a false positive, because composite sometimes looks 
+		//like observer, but composite will extend the type of class that is the type of class
+		//its "followers" collection contains. 
+		if(classesBeingImplemented != null)
+		{
+			for(ClassOrInterfaceType ci : classesBeingImplemented)
+			{
+				implementsOrExtends.add(ci.toString());
+			}
+		}
+		if(classesBeingExtended != null)
+		{
+			for(ClassOrInterfaceType ci : classesBeingExtended)
+			{
+				implementsOrExtends.add(ci.toString());
+			}
+		}
+
+	}
 	public Boolean implementsOrExtendsObservable(List<ClassOrInterfaceType> classesBeingImplemented,
 			List<ClassOrInterfaceType> classesBeingExtended)
 	{

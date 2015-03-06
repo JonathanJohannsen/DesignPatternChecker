@@ -34,6 +34,13 @@
         font:11px Verdana, Arial, Helvetica, sans-serif; 
         color:#333;
     }
+    
+    #listHeader
+    {
+        margin-top: -1px;
+        margin-bottom: -1px;
+        margin-left: -40px;
+    }
     </style>
     <link rel="stylesheet" type="text/css" href="Style.css" />
 </head>
@@ -156,7 +163,7 @@
                       ${subjectInfo.getSubjectName()}
                       <#if subjectInfo.getObservers()?has_content>
                          <ul>
-                         <lh>Observers:</lh>
+                         <h4 id="listHeader">Observers:</h4>
                          <#list subjectInfo.getObservers() as observerName>
                            <div>
                              <li>
@@ -214,7 +221,7 @@
                       ${mediatorInfo.getMediatorName()}
                       <#if mediatorInfo.getColleagues()?has_content>
                          <ul>
-                         <lh>Colleagues:</lh>
+                         <h4 id="listHeader">Colleagues:</h4>
                          <#list mediatorInfo.getColleagues() as colleagueName>
                            <div>
                              <li>
@@ -255,7 +262,7 @@
         </td></tr></table>
     </#if> 
     
-    <#if subjectErrors?has_content || subject?has_content>
+    <#if mediatorErrors?has_content || mediator?has_content>
         <hr>
     </#if>  
 

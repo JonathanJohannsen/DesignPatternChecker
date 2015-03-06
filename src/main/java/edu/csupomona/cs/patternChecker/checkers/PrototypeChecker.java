@@ -52,6 +52,15 @@ public class PrototypeChecker extends VoidVisitorAdapter<Object>
 		}
 		
 		String className = c.getName();
+		if(implementsCloneable(c.getImplements()))
+		{
+			//the easy case: if the class implements Cloneable, no need to check further
+			prototypeNames.add(className);	
+			return;
+		}
+		
+		//if we get this far, we need to check the design of the class to see if prototype was 
+		//implemented from scratch rather than from using Cloneable.
 		List<ClassOrInterfaceType> extendsNames = new ArrayList<ClassOrInterfaceType>();
 		if(c.getExtends() != null)
 		{
@@ -127,12 +136,7 @@ public class PrototypeChecker extends VoidVisitorAdapter<Object>
 			}
 		}
 		
-		if(c.toString().contains("implements Cloneable"))
-		{
-			prototypeNames.add(className);
-		}
-		
-		else if(hasPublicConstructor && hasRequiredReturnType)
+		if(hasPublicConstructor && hasRequiredReturnType)
 		{
 			prototypeNames.add(className);
 		}
@@ -168,5 +172,20 @@ public class PrototypeChecker extends VoidVisitorAdapter<Object>
 			}
 		}
 		return returnStmt;
+	}
+	
+	private static Boolean implementsCloneable(List<ClassOrInterfaceType> classesBeingImplemented)
+	{
+		if(classesBeingImplemented!=null)
+		{
+			for(ClassOrInterfaceType ci : classesBeingImplemented)
+			{
+				if(ci.toString().equals("Cloneable"))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }
