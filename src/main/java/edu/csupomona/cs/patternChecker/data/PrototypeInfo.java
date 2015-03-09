@@ -1,29 +1,23 @@
 package edu.csupomona.cs.patternChecker.data;
 
+
 import org.apache.commons.lang.StringEscapeUtils;
 
-public class PatternError 
+public class PrototypeInfo 
 {
-	private String className;
-	private String errorReason;
+	private String prototypeName;
 	private String Code;
 	
-	public PatternError(String cn, String er, String code)
+	public PrototypeInfo(String name, String code)
 	{
-		className=cn;
-		errorReason=er;
+		prototypeName = name;
 		String codeTemp = StringEscapeUtils.escapeHtml(code);
 		Code = codeTemp.replace("<", "&lt;").replace("&", "&amp;");
 	}
 	
-	public String getClassName()
+	public String getPrototypeName()
 	{
-		return className;
-	}
-	
-	public String getErrorReason()
-	{
-		return errorReason;
+		return prototypeName;
 	}
 	
 	public String getCode()

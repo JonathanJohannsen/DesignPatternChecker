@@ -11,16 +11,17 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
+
 import edu.csupomona.cs.patternChecker.data.*;
 
 public class SingletonChecker extends VoidVisitorAdapter<Object>
 {
-	private static List<String> singletonNames;
+	private static List<SingletonInfo> singletons;
 	private static List<PatternError> singletonErrors;
 	
 	public SingletonChecker()
 	{
-		singletonNames = new ArrayList<String>();
+		singletons = new ArrayList<SingletonInfo>();
 		singletonErrors = new ArrayList<PatternError>();
 	}
 	
@@ -79,14 +80,14 @@ public class SingletonChecker extends VoidVisitorAdapter<Object>
 		if(instanceVariableName.equals(returnVariableName)
 				&& !instanceVariableName.equals("") && constructorIsPrivate)
 		{
-			singletonNames.add(className);
+			singletons.add(new SingletonInfo(className, c.toString()));
 		}
 		
 		else if(instanceVariableName.equals(returnVariableName)
 				&& !instanceVariableName.equals(""))
 		{
 			//a possible singleton error
-			singletonErrors.add(new PatternError(className, "Contains a public constructor"));
+			singletonErrors.add(new PatternError(className, "Contains a public constructor", c.toString()));
 		}
 	}
 	
@@ -116,11 +117,11 @@ public class SingletonChecker extends VoidVisitorAdapter<Object>
 		return returnName;
 	}
 	
-	public List<String> getSingletonNames()
+	public List<SingletonInfo> getSingletons()
 	{
-		List<String> returnList=new ArrayList<String>();
-		returnList.addAll(singletonNames);
-		singletonNames.clear();
+		List<SingletonInfo> returnList=new ArrayList<SingletonInfo>();
+		returnList.addAll(singletons);
+		singletons.clear();
 		return returnList;
 	}
 	

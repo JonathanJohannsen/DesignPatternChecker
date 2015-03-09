@@ -56,7 +56,8 @@ public class SubjectMediatorChecker extends VoidVisitorAdapter<Object>
 		if(implementsOrExtendsObservable(c.getImplements(), c.getExtends()))
 		{
 			//the easy case: the class simply implements or extends observable, so we can immediately add it
-			subjectNames.add(new SubjectInfo(className, "anyThatImplement"));
+			subjectNames.add(new SubjectInfo(className, "anyThatImplement", c.toString()));
+			return;
 		}
 		
 		//make a list of every other class that is extended or implemented by this class
@@ -95,24 +96,30 @@ public class SubjectMediatorChecker extends VoidVisitorAdapter<Object>
 				continue;
 			}
 			
+			if(ci.getType().equals(ci.getClassCollectionIsIn()))
+			{
+				//another possible composite false positive.
+				continue;
+			}
+			
 			if(ci.IsSubjectPattern())
 			{
-				subjectNames.add(new SubjectInfo(ci.getClassCollectionIsIn(), ci.getType()));
+				subjectNames.add(new SubjectInfo(ci.getClassCollectionIsIn(), ci.getType(), c.toString()));
 			}
 			
 			else if(ci.IsMediatorPattern())
 			{
-				mediatorNames.add(new MediatorInfo(ci.getClassCollectionIsIn(), ci.getType()));
+				mediatorNames.add(new MediatorInfo(ci.getClassCollectionIsIn(), ci.getType(), c.toString()));
 			}
 			
 			else if(ci.HasAddMethod() && ci.HasNotifyLoop())
 			{
-				subjectErrors.add(new PatternError(ci.getClassCollectionIsIn(), "Subject has no remove method"));
+				subjectErrors.add(new PatternError(ci.getClassCollectionIsIn(), "Subject has no remove method", c.toString()));
 			}
 			
 			else if(ci.HasRemoveMethod() && ci.HasNotifyLoop())
 			{
-				subjectErrors.add(new PatternError(ci.getClassCollectionIsIn(), "Subject has no add method"));
+				subjectErrors.add(new PatternError(ci.getClassCollectionIsIn(), "Subject has no add method", c.toString()));
 			}
 		}
 		implementsOrExtends.clear();
@@ -318,7 +325,7 @@ public class SubjectMediatorChecker extends VoidVisitorAdapter<Object>
 		{
 			for(ClassOrInterfaceType ci : classesBeingImplemented)
 			{
-				if(ci.toString().equals("Observable"))
+				if(ci.toString().startsWith("Observable"))
 				{
 					return true;
 				}
@@ -329,7 +336,7 @@ public class SubjectMediatorChecker extends VoidVisitorAdapter<Object>
 		{
 			for(ClassOrInterfaceType ci : classesBeingExtended)
 			{
-				if(ci.toString().equals("Observable"))
+				if(ci.toString().startsWith("Observable"))
 				{
 					return true;
 				}

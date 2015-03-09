@@ -19,6 +19,7 @@ import org.eclipse.jgit.api.errors.TransportException;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -78,9 +79,9 @@ public class WebController
 	        e.printStackTrace();
         }
 
+		//grab each file from the repository that is a java file, and loop through them to be parsed.
 		List<File> javaFiles = new ArrayList<File>();
 		findJavaFiles(file, javaFiles);
-		
 		for(File iterator : javaFiles)
 		{
 			FileInputStream in = new FileInputStream(iterator);
@@ -94,7 +95,7 @@ public class WebController
 			{
 				in.close();
 			}
-
+			//check for each type of design pattern in this file.
 	        singletonChecker.visit(cu, null);
 	        prototypeChecker.visit(cu, null);
 	        subjectMediatorChecker.visit(cu,  null);
@@ -102,6 +103,8 @@ public class WebController
 		
 		if(!subjectMediatorChecker.getSubjects(false).isEmpty())
 		{
+			//if there are subject or mediator implementations in this project, we want to search for 
+			//any colleagues or observers that are related to them. Parse the project again to find them.
 			for(File iterator : javaFiles)
 			{
 				FileInputStream in = new FileInputStream(iterator);
@@ -145,14 +148,22 @@ public class WebController
 	{
 		//prints out the methods that were found. Redirected here from checkGit()
 		ModelAndView modelAndView = new ModelAndView("home");
-		modelAndView.addObject("singleton", singletonChecker.getSingletonNames());
+		modelAndView.addObject("singleton", singletonChecker.getSingletons());
 		modelAndView.addObject("singletonErrors", singletonChecker.getSingletonErrors());
-		modelAndView.addObject("prototype", prototypeChecker.getPrototypeNames());
+		modelAndView.addObject("prototype", prototypeChecker.getPrototypes());
 		modelAndView.addObject("prototypeErrors", prototypeChecker.getPrototypeErrors());
 		modelAndView.addObject("subject", subjectMediatorChecker.getSubjects(true));
 		modelAndView.addObject("subjectErrors", subjectMediatorChecker.getSubjectErrors());
 		modelAndView.addObject("mediator", subjectMediatorChecker.getMediators(true));
 		modelAndView.addObject("gitURL", gitURL);
+		return modelAndView;
+	}
+	
+	@RequestMapping(value="/patternChecker/ShowCode", method = RequestMethod.POST)
+	ModelAndView showCode(@RequestParam("codeToPrint") String codeToShow)
+	{
+		ModelAndView modelAndView = new ModelAndView("codeView");
+		modelAndView.addObject("codeToShow", codeToShow);
 		return modelAndView;
 	}
 }

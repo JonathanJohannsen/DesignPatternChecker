@@ -12,6 +12,22 @@
         color:#333;
     }
     
+    #codeLink
+    {
+        border: 0;
+        padding: 0;
+        display: inline;
+        background: none;
+        text-decoration: underline;
+        color: blue;
+        margin-bottom:-10px;
+        margin-top: -1px;
+    }
+    button:hover 
+    {
+        cursor: pointer;
+    }
+    
     #loading
     {
         margin-top: 7px;
@@ -41,12 +57,19 @@
         margin-bottom: -1px;
         margin-left: -40px;
     }
+    
+    #mainTitle
+    {
+        color: #333; font-family: 'Droid serif', serif; font-size: 36px; font-weight: 400; 
+        font-style: italic; line-height: 44px; margin: 0 0 12px; 
+        text-align: left; 
+    }
     </style>
     <link rel="stylesheet" type="text/css" href="Style.css" />
 </head>
 
 <body>
-    <h2 class="mainTitle">Design Pattern Checker</h2>
+    <h2 id="mainTitle">Design Pattern Checker</h2>
     <!-- Submission box for a git url -->
     <div id = "enter">
         <div>
@@ -63,7 +86,7 @@
     <div id="loading"></div> 
     <hr>
     <#if gitURL??>
-        <h1>Results</h1>
+        <h1 id = "mainTitle">Results</h1>
     </#if>
     
     <!-- Singleton Names -->
@@ -72,9 +95,12 @@
         <h2>Singleton:</h2> 
         <label>The following instances of Singleton were found in the repository</label>   
             <ul>
-                <#list singleton as singletonName>
+                <#list singleton as singletonInfo>
                   <li>
-                    ${singletonName}
+                  <form target="_blank" action="/patternChecker/ShowCode" method="post">
+                        <input type="hidden" name="codeToPrint" value="${singletonInfo.getCode()}" />
+                        <button id="codeLink">${singletonInfo.getSingletonName()}</button>
+                    </form>
                   </li>
                 </#list>
             </ul>
@@ -96,8 +122,11 @@
             <ul>
                 <#list singletonErrors as singletonError>
                   <li>
-                    ${singletonError.getClassName()} : <i>
-                    ${singletonError.getErrorReason()} </i>
+                  <form style="display:inline;" target="_blank" action="/patternChecker/ShowCode" method="post">
+                        <input type="hidden" name="codeToPrint" value="${singletonError.getCode()}" />
+                        <button id="codeLink">${singletonError.getClassName()}</button>
+                    </form> &nbsp;
+                    <i>${singletonError.getErrorReason()} </i>
                   </li>
                 </#list>
             </ul>
@@ -114,9 +143,12 @@
         <h2>Prototype:</h2> 
         <label>The following instances of Prototype were found in the repository</label>   
             <ul>
-                <#list prototype as prototypeName>
+                <#list prototype as prototypeInfo>
                   <li>
-                    ${prototypeName}
+                    <form target="_blank" action="/patternChecker/ShowCode" method="post">
+                        <input type="hidden" name="codeToPrint" value="${prototypeInfo.getCode()}" />
+                        <button id="codeLink">${prototypeInfo.getPrototypeName()}</button>
+                    </form>
                   </li>
                 </#list>
             </ul>
@@ -138,8 +170,11 @@
             <ul>
                 <#list prototypeErrors as prototypeError>
                   <li>
-                    ${prototypeError.getClassName()} : <i>
-                    ${prototypeError.getErrorReason()} </i>
+                    <form style="display:inline;" target="_blank" action="/patternChecker/ShowCode" method="post">
+                        <input type="hidden" name="codeToPrint" value="${prototypeError.getCode()}" />
+                        <button id="codeLink">${prototypeError.getClassName()}</button>
+                    </form> &nbsp;
+                    <i>${prototypeError.getErrorReason()} </i>
                   </li>
                 </#list>
             </ul>
@@ -160,7 +195,10 @@
               <li>
                 <div>
                     <div>
-                      ${subjectInfo.getSubjectName()}
+                    <form target="_blank" action="/patternChecker/ShowCode" method="post">
+                        <input type="hidden" name="codeToPrint" value="${subjectInfo.getCode()}" />
+                        <button id="codeLink">${subjectInfo.getSubjectName()}</button>
+                    </form>
                       <#if subjectInfo.getObservers()?has_content>
                          <ul>
                          <h4 id="listHeader">Observers:</h4>
@@ -196,8 +234,11 @@
             <ul>
                 <#list subjectErrors as subjectError>
                   <li>
-                    ${subjectError.getClassName()} : <i>
-                    ${subjectError.getErrorReason()} </i>
+                  <form style="display:inline;" target="_blank" action="/patternChecker/ShowCode" method="post">
+                        <input type="hidden" name="codeToPrint" value="${subjectError.getCode()}" />
+                        <button id="codeLink">${subjectError.getClassName()}</button>
+                    </form> &nbsp;
+                    <i>${subjectError.getErrorReason()} </i>
                   </li>
                 </#list>
             </ul>
@@ -218,7 +259,10 @@
               <li>
                 <div>
                     <div>
-                      ${mediatorInfo.getMediatorName()}
+                    <form target="_blank" action="/patternChecker/ShowCode" method="post">
+                        <input type="hidden" name="codeToPrint" value="${mediatorInfo.getCode()}" />
+                        <button id="codeLink">${mediatorInfo.getMediatorName()}</button>
+                    </form>
                       <#if mediatorInfo.getColleagues()?has_content>
                          <ul>
                          <h4 id="listHeader">Colleagues:</h4>
@@ -254,8 +298,11 @@
             <ul>
                 <#list mediatorErrors as mediatorError>
                   <li>
-                    ${mediatorError.getClassName()} : <i>
-                    ${mediatorError.getErrorReason()} </i>
+                    <form style="display:inline;" target="_blank" action="/patternChecker/ShowCode" method="post">
+                        <input type="hidden" name="codeToPrint" value="${mediatorError.getCode()}" />
+                        <button id="codeLink">${mediatorError.getClassName()}</button>
+                    </form> &nbsp;
+                   <i> ${mediatorError.getErrorReason()} </i>
                   </li>
                 </#list>
             </ul>

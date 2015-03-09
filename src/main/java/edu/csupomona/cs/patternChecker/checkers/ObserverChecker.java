@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import edu.csupomona.cs.patternChecker.data.MediatorInfo;
@@ -11,6 +12,8 @@ import edu.csupomona.cs.patternChecker.data.SubjectInfo;
 
 public class ObserverChecker extends VoidVisitorAdapter<Object>
 {
+	//observer checker checks for observers of any subjects in the project as well as any colleagues
+	//of any mediators in the project.
 	private List<SubjectInfo> subjects;
 	private List<MediatorInfo> mediators;
 	
@@ -25,7 +28,8 @@ public class ObserverChecker extends VoidVisitorAdapter<Object>
 		mediators.addAll(mi);
 	}
 	
-	// finds any class that is built to observe any of the subjects in the system
+	// finds any class that is built to observe one of the subjects in the project or is a colleague
+	// of one of the mediators in the project.
 	public void visit(ClassOrInterfaceDeclaration c, Object arg)
 	{
 		if(c.getName() == null)
@@ -49,16 +53,13 @@ public class ObserverChecker extends VoidVisitorAdapter<Object>
 				observerType = si.getObserverType();
 			}
 
-			String impString = "implements " + observerType;
-			String extString = "extends " + observerType;
-			String wholeThing = c.toString();
 			if(className.equals(si.getObserverType()))
 			{
+				//if this class is of the same type as this subject's observers, add it
 				si.addObserver(className);
 			}
-
-			else if(wholeThing.contains(impString) || wholeThing.contains(extString) &&
-					!className.equals(si.getSubjectName()))
+			
+			else if(isObserverExtendedOrImplemented(c.getExtends(), c.getImplements(), observerType))
 			{
 				si.addObserver(className);
 			}
@@ -79,5 +80,31 @@ public class ObserverChecker extends VoidVisitorAdapter<Object>
 				mi.addColleague(className);
 			}
 		}
+	}
+	
+	private static Boolean isObserverExtendedOrImplemented(List<ClassOrInterfaceType> extended,
+			List<ClassOrInterfaceType> implemented, String observerType)
+	{
+		if(extended != null)
+		{
+			for(ClassOrInterfaceType c : extended)
+			{
+				if(c.toString().startsWith(observerType))
+				{
+					return true;
+				}
+			}
+		}
+		if(implemented != null)
+		{
+			for(ClassOrInterfaceType c : implemented)
+			{
+				if(c.toString().startsWith(observerType))
+				{
+					return true;
+				}
+			}	
+		}
+		return false;
 	}
 }

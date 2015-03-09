@@ -15,23 +15,24 @@ import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import edu.csupomona.cs.patternChecker.data.PatternError;
+import edu.csupomona.cs.patternChecker.data.PrototypeInfo;
 
 public class PrototypeChecker extends VoidVisitorAdapter<Object>
 {
-	private static List<String> prototypeNames;
+	private static List<PrototypeInfo> prototypes;
 	private static List<PatternError> prototypeErrors;
 	
 	public PrototypeChecker()
 	{
-		prototypeNames = new ArrayList<String>();
+		prototypes = new ArrayList<PrototypeInfo>();
 		prototypeErrors = new ArrayList<PatternError>();
 	}
 	
-	public List<String> getPrototypeNames()
+	public List<PrototypeInfo> getPrototypes()
 	{
-		List<String> returnList=new ArrayList<String>();
-		returnList.addAll(prototypeNames);
-		prototypeNames.clear();
+		List<PrototypeInfo> returnList=new ArrayList<PrototypeInfo>();
+		returnList.addAll(prototypes);
+		prototypes.clear();
 		return returnList;
 	}
 	
@@ -55,7 +56,7 @@ public class PrototypeChecker extends VoidVisitorAdapter<Object>
 		if(implementsCloneable(c.getImplements()))
 		{
 			//the easy case: if the class implements Cloneable, no need to check further
-			prototypeNames.add(className);	
+			prototypes.add(new PrototypeInfo(className, c.toString()));	
 			return;
 		}
 		
@@ -100,7 +101,7 @@ public class PrototypeChecker extends VoidVisitorAdapter<Object>
 				if(returnStmt!=null)
 				{
 					//make sure the return statement is creating a new object
-					Node b = returnStmt.getChildrenNodes().get(0);
+					Expression b = returnStmt.getExpr();
 					if(b !=null && b instanceof ObjectCreationExpr)
 					{
 						//make sure the parameter is 'this'
@@ -138,13 +139,13 @@ public class PrototypeChecker extends VoidVisitorAdapter<Object>
 		
 		if(hasPublicConstructor && hasRequiredReturnType)
 		{
-			prototypeNames.add(className);
+			prototypes.add(new PrototypeInfo(className, c.toString()));
 		}
 		
 		else if(hasPublicConstructor && possibleErrorReturnType)
 		{
 			prototypeErrors.add(new PatternError(className, "Prototype clone should return an "
-					+ "instance of 'this'"));
+					+ "instance of 'this'", c.toString()));
 		}
 	}
 	
