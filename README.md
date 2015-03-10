@@ -1,6 +1,8 @@
 Overview 
 --------
 
+After starting the program, go to http://localhost:8080/patternChecker/Home on your web browser to run the project.
+
 For testing purposes, I recommend the following github repositories:
 
 https://github.com/JonathanJohannsen/Example
