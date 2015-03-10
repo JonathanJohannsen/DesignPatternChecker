@@ -46,7 +46,8 @@ public class WebController
 
 	//http://localhost:8080/patternChecker/Home
 	//https://github.com/JonathanJohannsen/ObserverTest
-	//https://github.com/JonathanJohannsen/java-design-patterns
+	//https://github.com/JonathanJohannsen/Example
+	//https://github.com/JonathanJohannsen/Example2
 	@RequestMapping(value = "/patternChecker/{repoURL}/checkGit", method = RequestMethod.POST)
 	void checkGit(@PathVariable("repoURL") String repoURL) throws ParseException, IOException
 	{
